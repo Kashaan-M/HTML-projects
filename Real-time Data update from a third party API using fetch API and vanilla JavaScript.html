@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-time Data update from a third party API using fetch API and vanilla JavaScript</title>
+  
+</head>
+<body>
+
+    <div></div>
+    
+    <script>
+        const url = 'https://api.energyandcleanair.org/v1/russia_counter';
+        const div = document.querySelector('div');
+        // const div is the <div> element to display our required data
+
+        let totalEur;
+        // totalEur is where we will store our real-time data
+
+        let result=[];
+        // result is where we will store our formatted(XX XXX XXX XXX) real-time data
+
+        function fetchData() {
+        // placing our fetch call inside a function for easier execution
+        fetch(url)
+        .then(blob => blob.json()) // blob is a promise object we use .json() method to output into json format
+        .then(data => getTotalEur(data)) // this is the first magical part. Take that json data and pass it into the getTotalEur() func defined below
+        .catch(error=>console.log(error)) // log the error incase the asynchronous fetch request fails
+        .finally(() => setTimeout(fetchData,1000)); // this is the second magical part. It means no matter if the promise is rejected or fulfilled run this code.This is what .finally() is doing here.It is recursively calling our fetchData() function after 1 second/ 1000ms
+        
+        function getTotalEur(data) {
+            totalEur = Math.round(data['total_eur']); // round the decimal value for 'total_eur' into a number
+            totalEur = totalEur.toString(); // here we convert totalEur from number into String for manipulation and formatting
+            result = [totalEur.slice(0,2), totalEur.slice(2,5), totalEur.slice(5,8), totalEur.slice(8,11)];
+            // result is an empty array to start with. We are using slice() to slice our totalEur string into the desired formatting i.e., [XX,XXX,XXX,XXX]
+            result = result.join(' ');
+            // using join() to convert [XX,XXX,XXX,XXX] into 'XX XXX XXX XXX' OR from an array object into a space-separated string 
+            div.textContent = `total_eur: ${result}`;
+            // here is where we place the result variable value inside our <div>
+        }
+    }
+        fetchData(); // calling fetchData() one time to keep the real-time data stuff going.Voila! 
+    </script>
+</body>
+</html>
